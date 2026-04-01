@@ -11,7 +11,7 @@ import ManagerOnly from "@/components/ManagerOnly";
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { isManager, login } = useAuth();
+  const { isManager, login, refreshPin } = useAuth();
   const [pinModalOpen, setPinModalOpen] = useState(false);
   const [connection, setConnection] = useState<"live" | "offline" | "connecting">("connecting");
 
@@ -38,7 +38,7 @@ export default function SettingsPage() {
     if (newPin !== confirmPin) { setPinMsg({ text: "PINs do not match", error: true }); return; }
     const { error } = await supabase.from("settings").update({ value: newPin }).eq("key", "admin_pin");
     if (error) setPinMsg({ text: "Save failed", error: true });
-    else { setCurPin(""); setNewPin(""); setConfirmPin(""); setPinMsg({ text: "PIN changed!", error: false }); }
+    else { await refreshPin(); setCurPin(""); setNewPin(""); setConfirmPin(""); setPinMsg({ text: "PIN changed!", error: false }); }
   };
 
   const handleExport = async () => {

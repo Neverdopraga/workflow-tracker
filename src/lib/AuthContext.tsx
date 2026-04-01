@@ -10,12 +10,14 @@ interface AuthContextType {
   isManager: boolean;
   login: (pin: string) => boolean;
   logout: () => void;
+  refreshPin: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isManager: false,
   login: () => false,
   logout: () => {},
+  refreshPin: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -72,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   if (!loaded) return null;
 
   return (
-    <AuthContext.Provider value={{ isManager, login, logout }}>
+    <AuthContext.Provider value={{ isManager, login, logout, refreshPin: loadPin }}>
       {children}
     </AuthContext.Provider>
   );

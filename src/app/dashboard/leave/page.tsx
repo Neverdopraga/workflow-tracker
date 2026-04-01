@@ -67,6 +67,25 @@ export default function LeavePage() {
     ? leaves
     : leaves.filter((l) => l.status === filterStatus);
 
+  // This week's leaves (Mon–Sun)
+  const getWeekRange = () => {
+    const now = new Date();
+    const day = now.getDay();
+    const mon = new Date(now);
+    mon.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+    mon.setHours(0, 0, 0, 0);
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    sun.setHours(23, 59, 59, 999);
+    return { mon, sun };
+  };
+  const { mon: weekStart, sun: weekEnd } = getWeekRange();
+  const thisWeekLeaves = leaves.filter((l) => {
+    const from = new Date(l.from_date);
+    const to = new Date(l.to_date);
+    return from <= weekEnd && to >= weekStart;
+  });
+
   const stats = {
     total: leaves.length,
     pending: leaves.filter((l) => l.status === "Pending").length,
@@ -192,6 +211,45 @@ export default function LeavePage() {
               <p className={`text-2xl font-black ${s.color}`}>{s.count}</p>
             </div>
           ))}
+        </div>
+
+        {/* This Week's Leave */}
+        <div className="bg-white rounded-2xl border border-border p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary-600" />
+              This Week&apos;s Leave
+            </h2>
+            <span className="text-[10px] font-bold text-gray-400 uppercase">
+              {weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – {weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            </span>
+          </div>
+          {thisWeekLeaves.length > 0 ? (
+            <div className="space-y-2">
+              {thisWeekLeaves.map((l) => {
+                const st = statusStyle[l.status];
+                const StIcon = st.icon;
+                return (
+                  <div key={l.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-gray-50 border border-border-light">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-7 h-7 rounded-lg ${st.bg} flex items-center justify-center flex-shrink-0`}>
+                        <StIcon className={`w-3.5 h-3.5 ${st.text}`} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-gray-900 truncate">{l.employee_name}</p>
+                        <p className="text-[10px] text-gray-400">{l.leave_type} · {l.from_date} → {l.to_date}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${st.bg} ${st.text} ${st.border}`}>
+                      {l.status}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 text-center py-4">No leave this week</p>
+          )}
         </div>
 
         {/* Filter */}
