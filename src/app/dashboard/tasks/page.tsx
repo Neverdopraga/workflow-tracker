@@ -43,7 +43,12 @@ export default function TasksPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadData(); const i = setInterval(loadData, 30000); return () => clearInterval(i); }, [loadData]);
+  useEffect(() => {
+    loadData();
+    if (taskModalOpen || detailTask) return; // pause auto-refresh while modal is open
+    const i = setInterval(loadData, 30000);
+    return () => clearInterval(i);
+  }, [loadData, taskModalOpen, detailTask]);
 
   useRealtime("tasks", useCallback((payload) => {
     if (payload.eventType === "INSERT") setTasks((p) => [payload.new as Task, ...p]);

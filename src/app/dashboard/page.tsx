@@ -17,7 +17,7 @@ import PinModal from "@/components/PinModal";
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import { Plus, Download, Upload, Filter } from "lucide-react";
-import ManagerOnly from "@/components/ManagerOnly";
+
 
 export default function DashboardPage() {
   const { toast } = useToast();
@@ -48,7 +48,12 @@ export default function DashboardPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadData(); const i = setInterval(loadData, 30000); return () => clearInterval(i); }, [loadData]);
+  useEffect(() => {
+    loadData();
+    if (taskModalOpen || detailTask) return; // pause auto-refresh while modal is open
+    const i = setInterval(loadData, 30000);
+    return () => clearInterval(i);
+  }, [loadData, taskModalOpen, detailTask]);
 
   useRealtime("tasks", useCallback((payload) => {
     if (payload.eventType === "INSERT") setTasks((p) => [payload.new as Task, ...p]);
@@ -125,7 +130,6 @@ export default function DashboardPage() {
   };
 
   return (
-    <ManagerOnly>
     <div className="flex flex-col min-h-screen">
       <Topbar onLoginClick={() => setPinModalOpen(true)} />
 
@@ -183,6 +187,5 @@ export default function DashboardPage() {
       <PinModal open={pinModalOpen} onClose={() => setPinModalOpen(false)}
         onSubmit={(pin) => { const ok = login(pin); if (ok) { setPinModalOpen(false); toast("Welcome, Manager!", "success"); } return ok; }} />
     </div>
-    </ManagerOnly>
   );
 }

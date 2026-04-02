@@ -40,7 +40,7 @@ export default function Topbar({ onLoginClick }: TopbarProps) {
 
         {/* Login / Logout */}
         <button
-          onClick={isManager ? logout : onLoginClick}
+          onClick={isManager ? () => { logout(); window.location.href = "/dashboard/tasks"; } : onLoginClick}
           className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition ${
             isManager
               ? "bg-gray-50 text-gray-600 border border-border hover:bg-red-50 hover:text-red-600 hover:border-red-200"
