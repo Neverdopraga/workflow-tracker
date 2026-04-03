@@ -175,13 +175,13 @@ export default function ProductionPage() {
             <p className="text-sm text-gray-400">{stats.total} projects · {stats.active} active</p>
           </div>
           <div className="flex items-center gap-2">
-            {hasFullAccess && (
+            {canEdit && (
               <Link href="/dashboard/production/machine-types"
                 className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 bg-white border border-border px-3 py-2 rounded-xl hover:bg-gray-50 transition">
                 <Settings2 className="w-3.5 h-3.5" /> Machine Types
               </Link>
             )}
-            {hasFullAccess && (
+            {canEdit && (
               <button onClick={() => setModalOpen(true)}
                 className="flex items-center gap-1.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 px-5 py-2.5 rounded-xl transition shadow-sm">
                 <Plus className="w-4 h-4" /> New Project
