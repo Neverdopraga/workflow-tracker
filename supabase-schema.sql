@@ -26,7 +26,20 @@ ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all for tasks" ON tasks;
 CREATE POLICY "Allow all for tasks" ON tasks FOR ALL USING (true) WITH CHECK (true);
 
--- 0b. Supervisors table
+-- 0b. Managers table
+CREATE TABLE IF NOT EXISTS managers (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  name text UNIQUE NOT NULL,
+  pin text,
+  department text,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE managers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all for managers" ON managers;
+CREATE POLICY "Allow all for managers" ON managers FOR ALL USING (true) WITH CHECK (true);
+
+-- 0c. Supervisors table
 CREATE TABLE IF NOT EXISTS supervisors (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   name text UNIQUE NOT NULL,
@@ -36,6 +49,10 @@ CREATE TABLE IF NOT EXISTS supervisors (
 
 ALTER TABLE supervisors ADD COLUMN IF NOT EXISTS pin text;
 ALTER TABLE supervisors ADD COLUMN IF NOT EXISTS department text;
+ALTER TABLE supervisors ADD COLUMN IF NOT EXISTS manager_name text;
+ALTER TABLE supervisors ADD COLUMN IF NOT EXISTS phone text;
+
+ALTER TABLE managers ADD COLUMN IF NOT EXISTS phone text;
 
 ALTER TABLE supervisors ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all for supervisors" ON supervisors;
@@ -95,6 +112,8 @@ CREATE TABLE IF NOT EXISTS leave_requests (
   approved_by text,
   created_at timestamptz DEFAULT now()
 );
+
+ALTER TABLE leave_requests ADD COLUMN IF NOT EXISTS approval_comment text;
 
 ALTER TABLE leave_requests ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all for leave_requests" ON leave_requests;
@@ -158,6 +177,7 @@ VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- 7. Enable Realtime for key tables
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE managers; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE tasks; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE notifications; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE comments; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
